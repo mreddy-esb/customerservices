@@ -1,15 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
     <flow name="customer-servicesFlow">
         <http:listener config-ref="HTTP_Listener_Configuration2" path="/customerservices" doc:name="HTTP"/>
         <logger level="INFO" doc:name="Logger"/>
-        <json:json-to-xml-transformer doc:name="JSON to XML"/>
+        <set-payload value="#['{
+    &quot;glossary&quot;: {
+        &quot;title&quot;: &quot;example glossary&quot;,
+		&quot;GlossDiv&quot;: {
+            &quot;title&quot;: &quot;S&quot;,
+			&quot;GlossList&quot;: {
+                &quot;GlossEntry&quot;: {
+                    &quot;ID&quot;: &quot;SGML&quot;,
+					&quot;SortAs&quot;: &quot;SGML&quot;,
+					&quot;GlossTerm&quot;: &quot;Standard Generalized Markup Language&quot;,
+					&quot;Acronym&quot;: &quot;SGML&quot;,
+					&quot;Abbrev&quot;: &quot;ISO 8879:1986&quot;,
+					&quot;GlossDef&quot;: {
+                        &quot;para&quot;: &quot;A meta-markup language, used to create markup languages such as DocBook.&quot;,
+						&quot;GlossSeeAlso&quot;: [&quot;GML&quot;, &quot;XML&quot;]
+                    },
+					&quot;GlossSee&quot;: &quot;markup&quot;
+                }
+            }
+        }
+    }
+}']" doc:name="Set Payload"/>
+        <json:json-to-xml-transformer doc:name="JSON to XML" mimeType="application/xml"/>
+        <vm:outbound-endpoint exchange-pattern="request-response" path="domain-demo" connector-ref="sharedVmConnector" doc:name="VM"/>
     </flow>
 </mule>
